@@ -16,7 +16,7 @@ class Spider:
 
     def __init__(self, project_name, base_url, domain_name):
         Spider.project_name = project_name
-        Spider.base_url = Spider.base_url + urlopen()
+        Spider.base_url = base_url
         Spider.domain_name = domain_name
         Spider.queue_file = Spider.project_name + '/queue.txt'
         Spider.crawled_file = Spider.project_name + '/crawled.txt'
