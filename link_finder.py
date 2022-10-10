@@ -18,6 +18,9 @@ class LinkParser(HTMLParser ):
                     url = parse.urljoin(self.base_url, v)
                     self.links.add(url)
 
+    def page_links(self):
+        return self.links
+
 
     def error(selfself, message):
         pass
