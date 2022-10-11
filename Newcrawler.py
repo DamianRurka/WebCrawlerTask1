@@ -3,11 +3,13 @@ from bs4 import BeautifulSoup
 
 
 class WebCrawler:
+    url = ""
 
-    def __init__(self):
+    def __init__(self,new_url):
+        WebCrawler.url = new_url
         self.get_links()
 
-    def get_links(self):
+    def get_links(self, new_url):
         self.url = "https://www.youtube.com/"
         self.response = requests.get(self.url)
         self.soup = BeautifulSoup(self.response.text, 'html.parser')
@@ -29,7 +31,6 @@ class WebCrawler:
                     get_link == '/t/contact_us/':
                 continue
             if get_link in self.link_title_dict:
-
                 self.views_pages_number = self.link_views_dict.get(get_link)
                 new_views_pages_number = self.views_pages_number + 1
                 self.link_views_dict = {get_link: new_views_pages_number}
@@ -44,7 +45,9 @@ class WebCrawler:
 
         new_url_for_spider = self.id_link.get(self.IDX)
         if new_url_for_spider != self.url:
-            self.url = new_url_for_spider
+    #         url = new_url_for_spider  ZMIENNA GLOBALNA!!!
+    # get_links(url)
+
 
 
 start = WebCrawler()
