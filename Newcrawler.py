@@ -2,11 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 
 
-
 class WebCrawler:
 
-
-    def __init__(self,URL):
+    def __init__(self, URL):
         self.URL = URL
         self.IDX = 1
         self.link_views_dict = None
@@ -33,12 +31,7 @@ class WebCrawler:
             get_title = f"{link.string}"
             self.views_pages_number = 0
 
-            if get_link == '/None' or \
-                    get_link == "/" or \
-                    get_link == "/new" or \
-                    get_link == "/t/terms" or \
-                    get_link == "/t/privacy" or \
-                    get_link == '/t/contact_us/':
+            if get_link[0:5] != "https":
                 continue
             if get_link in self.link_title_dict:
                 self.views_pages_number = self.link_views_dict.get(get_link)
@@ -55,7 +48,6 @@ class WebCrawler:
         new_url_for_spider = self.id_link.get(self.IDX)
         self.IDX += 1
         if new_url_for_spider != self.url:
-
             self.URL = new_url_for_spider
 
             self.get_links()
@@ -63,4 +55,3 @@ class WebCrawler:
 
 start = WebCrawler("https://www.youtube.com/")
 start.get_links()
-
