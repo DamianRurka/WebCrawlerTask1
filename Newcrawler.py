@@ -1,24 +1,50 @@
 import requests
 from bs4 import BeautifulSoup
 
-url="https://www.youtube.com/"
 
-response = requests.get(url)
-soup = BeautifulSoup(response.text,'html.parser')
-idx = 0
-data = dict()
-for link in soup.find_all('a',href=True):
-    idx += 1
-    if (f"{link.get('href')}") == '/None':
-        continue
-    if (f"{link.get('href')}") in data:
-        # TODO:licznik wyswietlen
-        #  licznik podstron
-        #  licznik stron
-        #  stworzenie pająka poprzez dodawanie w petli nowych url
-        break
-    data[(f"{link.get('href')}"
-        f"{link.string}")] += idx
+class WebCrawler:
 
-for line in data:
-    print(line)
+    def __init__(self):
+        self.get_links()
+
+    def get_links(self):
+        self.url = "https://www.youtube.com/"
+        self.response = requests.get(self.url)
+        self.soup = BeautifulSoup(self.response.text, 'html.parser')
+        self.pages_number = -1
+        self.link_title_dict = dict()
+        self.link_views_dict = dict()
+        self.id_link = dict()
+        self.IDX = 0
+        for link in self.soup.find_all('a', href=True):
+            get_link = (f"{link.get('href')}")
+            get_title = (f"{link.string}")
+            self.views_pages_number = 0
+
+            if get_link == '/None' or \
+                    get_link == "/" or\
+                    get_link == "/new" or \
+                    get_link == "/t/terms" or \
+                    get_link == "/t/privacy" or\
+                    get_link == '/t/contact_us/':
+                continue
+            if get_link in self.link_title_dict:
+
+                self.views_pages_number = self.link_views_dict.get(get_link)
+                new_views_pages_number = self.views_pages_number + 1
+                self.link_views_dict = {get_link: new_views_pages_number}
+                continue
+            else:
+                for k, v in self.link_title_dict.items():
+                    print("{}: {}".format(k, v))
+                self.link_title_dict = {get_link: get_title}
+                self.pages_number += 1                #TODO:liczba podstron na stronie
+                self.link_views_dict = {get_link: 1}  #TODO: number of page views
+                self.id_link = {self.IDX: get_link}
+
+        new_url_for_spider = self.id_link.get(self.IDX)
+        if new_url_for_spider != self.url:
+            self.url = new_url_for_spider
+
+
+start = WebCrawler()
