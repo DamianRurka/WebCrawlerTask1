@@ -16,7 +16,7 @@ class LinkParser(HPr):
         self.bUrl = url
         response = urlopen(url)
         print("next?")
-        if response.getheader('Content-Type')==('text/html'):
+        if response.getheader('Content-Type')=='text/html':
             print("yes")
             htmlBytes = response.read()
             htmlString = htmlBytes.decode("utf-8")
@@ -46,5 +46,5 @@ def spider_program(url, word,maxPages):
     if foundWord:
         print("secure detected,spider program: OFF ")
 
-start = spider_program("https://olx.pl/", "secure", 20)
+start = spider_program("https://www.google.com/", "secure", 20)
 
