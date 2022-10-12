@@ -103,7 +103,6 @@ class WebCrawler:
         if self.URL != self.base_url:
             self.external_numbers += 1
 
-        self.add_data_to_csv()
 
     def create_csv_headers(self):
         headers = ["link",
@@ -118,7 +117,7 @@ class WebCrawler:
 
     def add_data_to_csv(self):
 
-        all_data_to_save = []
+        all_data_to_append = [[]]
         with open('data.csv', 'w') as creating_new_csv_file:
             pass
 
