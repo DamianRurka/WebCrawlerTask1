@@ -24,7 +24,9 @@ class WebCrawler:
         self.internal_numbers = None
         self.link_title_dict = dict()
         self.id_link = dict()
+        self.create_csv_headers()
         self.get_links()
+
 
     def get_links(self):
         self.pages_idx = 0
@@ -102,6 +104,17 @@ class WebCrawler:
             self.external_numbers += 1
 
         self.add_data_to_csv()
+
+    def create_csv_headers(self):
+        headers = ["link",
+                   "title",
+                   "number of internal links",
+                   "number of external links",
+                   "number of times url was referenced by other pages"]
+
+        with open("data.csv", "w") as file:
+            create = csv.writer(file)
+            create.writerow(headers)
 
     def add_data_to_csv(self):
 
