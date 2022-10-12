@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
+import pandas as pd
 
 
 class WebCrawler:
@@ -110,16 +111,22 @@ class WebCrawler:
                    "number of internal links",
                    "number of external links",
                    "number of times url was referenced by other pages"]
-
         with open("data.csv", "w") as file:
             create = csv.writer(file)
             create.writerow(headers)
 
     def add_data_to_csv(self):
+        for k, v in self.link_title_dict.items():
+            data = {
+                'link' : [k],
+                'title' : [v],
+                'number of internal links': [],
+                'number of external links': [],
+                'number of times url was referenced by other pages':[]
+            }
+            df = pd.DataFrame(data)
+            df.to_csv('data.csv', mode='a', index = False, header = False)
 
-        all_data_to_append = [[]]
-        with open('data.csv', 'w') as creating_new_csv_file:
-            pass
 
 
 
