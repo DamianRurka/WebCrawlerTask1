@@ -138,4 +138,5 @@ start = WebCrawler("https://www.youtube.com/")
 # Coś w stylu : kiedy junior programuje ,google, stackoverflow, copy , paste , error : black screen , reset system , polubiłem już te memy :)
 # jeśli jakimś cudem dostanę się na ten staż to chyba tylko dlatego że ktoś doceni te moje wypociny i to że starałem
 # się jak tylko umiałem , niestety za mało czasu miałem żeby doprowadzić ten kod do 100% sprawności
+# Ps. Proszę o sprawdzenie commitów
 # dziękuje za poświęcony czas !
