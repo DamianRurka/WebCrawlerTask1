@@ -120,8 +120,8 @@ class WebCrawler:
                 'link': [k],
                 'title': [v],
                 'number of internal links': [self.pages_idx],
-                'number of external links': [0],
-                'number of times url was referenced by other pages': [0]
+                'number of external links': [self.external_numbers],
+                'number of times url was referenced by other pages': [self.number_of_external_links]
             }
             df = pd.DataFrame(data)
             df.to_csv('data.csv', mode='a', index=False, header=False)
