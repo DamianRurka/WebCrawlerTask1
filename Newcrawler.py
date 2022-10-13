@@ -18,6 +18,7 @@ def create_csv_headers():
 class WebCrawler:
 
     def __init__(self, URL):
+        self.links_to_csv = dict()
         self.new_url_for_spider = None
         self.pages_idx = 0
         self.searchIDX = 0
@@ -53,6 +54,8 @@ class WebCrawler:
             get_link = f"{link.get('href')}"
             get_title = f"{link.string}"
             self.views_pages_number = 0
+            if self.searchIDX > 3:
+                break
 
             if get_link[0:5] != "https":
                 continue
@@ -62,6 +65,7 @@ class WebCrawler:
                 continue
 
             else:
+                self.links_to_csv[get_link] = get_title
                 self.link_title_dict[get_link] = get_title
                 self.link_views_dict[get_link] = 1
                 self.id_link[self.IDX] = get_link
@@ -73,6 +77,7 @@ class WebCrawler:
 
     def new_url(self):
         self.searchIDX += 1
+
         self.new_url_for_spider = self.id_link.get(self.searchIDX)
         self.render_name_page()
         self.URL = self.new_url_for_spider
@@ -114,7 +119,8 @@ class WebCrawler:
             self.external_numbers += 1
 
     def add_data_to_csv(self):
-        for k, v in self.link_title_dict.items():
+
+        for k, v in self.links_to_csv.items():
             print("{}: {}".format(k, v))
             data = {
                 'link': [k],
@@ -126,6 +132,7 @@ class WebCrawler:
             df = pd.DataFrame(data)
             df.to_csv('data.csv', mode='a', index=False, header=False)
             self.pages_idx = 0
+        self.links_to_csv = dict()
 
 
 start = WebCrawler("https://www.youtube.com/")
