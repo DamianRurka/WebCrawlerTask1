@@ -18,17 +18,18 @@ def create_csv_headers():
 class WebCrawler:
 
     def __init__(self, URL):
+        self.links_index_of_internal_links = dict()
+        self.index_of_internal_external_links = 0
+        self.search_link = URL
         self.links_to_csv = dict()
         self.new_url_for_spider = None
-        self.pages_idx = 0
         self.searchIDX = 0
         self.actually_url = None
         self.basic_url = None
         self.base_url = None
         self.external_numbers = 0
         self.number_of_external_links = 0
-        self.URL = URL
-        self.IDX = -1
+        self.index_of_all_get_links = 1
         self.link_views_dict = dict()
         self.views_pages_number = None
         self.url = URL
@@ -37,12 +38,13 @@ class WebCrawler:
         self.internal_numbers = None
         self.link_title_dict = dict()
         self.id_link = dict()
+        self.id_link[1] = URL
         create_csv_headers()
         self.get_links()
 
     def get_links(self):
-        self.pages_idx = -1
-        self.url = self.URL
+        self.index_of_internal_external_links = 0
+        self.url = self.search_link
         self.base_url = self.url
         self.response = requests.get(self.url)
         self.soup = BeautifulSoup(self.response.text, 'html.parser')
@@ -68,23 +70,32 @@ class WebCrawler:
                 self.links_to_csv[get_link] = get_title
                 self.link_title_dict[get_link] = get_title
                 self.link_views_dict[get_link] = 1
-                self.id_link[self.IDX] = get_link
-                self.pages_idx += 1
-                self.IDX += 1
 
-        self.add_data_to_csv()
+                # licznik wszystkich znalezionych linków
+                self.index_of_all_get_links += 1
+
+                #słownik : numer linku i link
+                self.id_link[self.index_of_all_get_links] = get_link
+
+                #licznik podstron
+                self.index_of_internal_external_links += 1
+
+
+
         self.new_url()
 
     def new_url(self):
         self.searchIDX += 1
 
+        #dodanie do słownika linku i liczby podstron odnalezionych na tej stronie
+        self.links_index_of_internal_links[self.search_link] = self.index_of_internal_external_links
         self.new_url_for_spider = self.id_link.get(self.searchIDX)
         self.render_name_page()
-        self.URL = self.new_url_for_spider
+        self.search_link = self.new_url_for_spider
         self.get_links()
 
     def render_name_page(self):
-        link = tuple(self.URL)
+        link = tuple(self.search_link)
         actually_url = tuple(self.new_url_for_spider)
         index_of_dot_1 = link.index(".")
         index_of_dot_1_2 = actually_url.index(".")
@@ -112,10 +123,10 @@ class WebCrawler:
         if self.new_url_for_spider != self.basic_url:
             self.number_of_external_links += 1
 
-        if self.URL == self.base_url:
+        if self.search_link == self.base_url:
             self.internal_numbers += 1
 
-        if self.URL != self.base_url:
+        if self.search_link != self.base_url:
             self.external_numbers += 1
 
     def add_data_to_csv(self):
@@ -125,13 +136,13 @@ class WebCrawler:
             data = {
                 'link': [k],
                 'title': [v],
-                'number of internal links': [self.pages_idx],
+                'number of internal links': [self.index_of_internal_external_links],
                 'number of external links': [self.external_numbers],
                 'number of times url was referenced by other pages': [self.number_of_external_links]
             }
             df = pd.DataFrame(data)
             df.to_csv('data.csv', mode='a', index=False, header=False)
-            self.pages_idx = 0
+            self.index_of_internal_external_links = 0
         self.links_to_csv = dict()
 
 
