@@ -18,7 +18,14 @@ def create_csv_headers():
 class WebCrawler:
 
     def __init__(self, URL):
-        self.links_index_of_internal_links = dict()
+        self.links_index_of_internal_links = dict() #słownik link:liczba podstron
+        self.link_title_dict = dict()               #słownik link:tytuł
+        self.id_link = dict()                       #słownik numer strony : tytuł
+        self.id_link[1] = URL
+        self.link_true_false = dict()               #słownik link: true/false
+        self.link_true_false[URL] = False
+        self.internallink_link = dict()             #słownik : podstrona : link
+        self.link_number_of_external_links = dict() #słownik link : liczba podstron
         self.index_of_internal_external_links = 0
         self.search_link = URL
         self.links_to_csv = dict()
@@ -32,21 +39,17 @@ class WebCrawler:
         self.index_of_all_get_links = 1
         self.link_views_dict = dict()
         self.views_pages_number = None
-        self.url = URL
         self.soup = None
         self.response = None
         self.internal_numbers = None
         self.link_title_dict = dict()
-        self.id_link = dict()
-        self.id_link[1] = URL
         create_csv_headers()
         self.get_links()
 
     def get_links(self):
         self.index_of_internal_external_links = 0
-        self.url = self.search_link
-        self.base_url = self.url
-        self.response = requests.get(self.url)
+        self.base_url = self.search_link
+        self.response = requests.get(self.search_link)
         self.soup = BeautifulSoup(self.response.text, 'html.parser')
         self.internal_numbers = -1
         self.spider()
@@ -63,18 +66,22 @@ class WebCrawler:
                 continue
 
             if get_link in self.link_title_dict:
-                self.link_views_dict[get_link] = self.link_views_dict[get_link] + 1
+                self.link_views_dict[get_link] += 1  #TODO: jesli link jest juz w
+                                                     # bazie danych dodaj +1 do liczby odnośników tego linku
                 continue
 
             else:
-                self.links_to_csv[get_link] = get_title
+                #Ustawienie dla kazdego otrzymanego linku , linku nadrzędnego
+                self.internallink_link[get_link] = self.search_link
+                # dodanie do słownika linku i tytułu
                 self.link_title_dict[get_link] = get_title
-                self.link_views_dict[get_link] = 1
+
+                self.link_views_dict[get_link] = 0 #??? dodaj tą wartość dla każdego linku przy zapisie do csv
 
                 # licznik wszystkich znalezionych linków
                 self.index_of_all_get_links += 1
 
-                #słownik : numer linku i link
+                #słownik : numer linku i link , dodanie do słownika
                 self.id_link[self.index_of_all_get_links] = get_link
 
                 #licznik podstron
@@ -85,12 +92,27 @@ class WebCrawler:
         self.new_url()
 
     def new_url(self):
+        self.true_false = self.link_true_false.get(self.search_link)
+        if self.true_false == True:
+            # wczytanie nadrzędnego linku
+            search_link_for_add_number_external_links = self.internallink_link.get(self.search_link)
+
+            # dodanie liczy popodstron do linku aktualnie obsługiwanej podstrony
+            self.link_number_of_external_links[search_link_for_add_number_external_links] += \
+                self.index_of_internal_external_links
+
+
+        # następny sprawdzany link +1
         self.searchIDX += 1
 
-        #dodanie do słownika linku i liczby podstron odnalezionych na tej stronie
+        # dodanie do słownika linku i liczby podstron odnalezionych na tej stronie
         self.links_index_of_internal_links[self.search_link] = self.index_of_internal_external_links
+
+        # następny sprawdzany link
         self.new_url_for_spider = self.id_link.get(self.searchIDX)
-        self.render_name_page()
+        self.render_name_page() #???????
+
+        # nadanie link'owi wyszukujacemu nowego linku
         self.search_link = self.new_url_for_spider
         self.get_links()
 
