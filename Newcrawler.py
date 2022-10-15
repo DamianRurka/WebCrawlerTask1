@@ -19,19 +19,15 @@ class WebCrawler:
 
     def __init__(self, URL, count_of_results):
         self.ALL_DATA_TO_CSV = {URL: {'title': "home page", 'internal_links': 0,
-                                'external_links': 0, 'reference_count': 0}}
+                                      'external_links': 0, 'reference_count': 0}}
         self.soup = None
         self.response = None
-        self.links_internal_links_count_dict = dict()  # słownik link:liczba podstron
         self.link_title_dict = dict()  # słownik link:tytuł
         self.id_link_dict = dict()  # słownik numer strony : tytuł
         self.id_link_dict[1] = URL
         self.link_true_false_dict = dict()  # słownik link: true/false
         self.link_true_false_dict[URL] = False
         self.internal_link_link_dict = dict()  # słownik : podstrona : link
-        self.link_number_of_external_links_dict = dict()  # słownik link : liczba podstron
-        self.clear_link_reference_count_dict = dict()  # słownik czysty link : liczba odnośników
-        self.link_reference_count_dict = dict()  # słownik link : liczba odnośników
         self.index_of_internal_external_links = 0
         self.search_link = URL
         self.counter = count_of_results
@@ -70,9 +66,16 @@ class WebCrawler:
                 # Ustawienie dla kazdego otrzymanego linku , linku nadrzednego
                 self.internal_link_link_dict[get_link] = self.search_link
                 # dodanie do słownika linku i tytułu
-                self.ALL_DATA_TO_CSV[get_link]['title'] = get_title
+                if get_link in self.ALL_DATA_TO_CSV:
+                    self.ALL_DATA_TO_CSV[get_link]['title'] = get_title
+                else:
+                    self.ALL_DATA_TO_CSV[get_link] = {'title': get_title}
 
-                self.ALL_DATA_TO_CSV[get_link]['reference_count'] += 1
+                self.link_title_dict[get_link] = get_title
+                if get_link not in self.ALL_DATA_TO_CSV:
+                    self.ALL_DATA_TO_CSV[get_link]['reference_count'] += 1
+                else:
+                    self.ALL_DATA_TO_CSV[get_link]['reference_count'] = 1
 
                 # licznik wszystkich znalezionych linków
                 self.index_of_all_get_links += 1
@@ -93,14 +96,19 @@ class WebCrawler:
             search_link_for_add_number_external_links = self.internal_link_link_dict.get(self.search_link)
 
             # dodanie liczy popodstron do linku aktualnie obsługiwanej podstrony
-            self.ALL_DATA_TO_CSV[search_link_for_add_number_external_links]['external_links'] += \
-                self.index_of_internal_external_links
+            if search_link_for_add_number_external_links not in self.ALL_DATA_TO_CSV:
+                self.ALL_DATA_TO_CSV[search_link_for_add_number_external_links]['external_links'] += \
+                    self.index_of_internal_external_links
+            else:
+                self.ALL_DATA_TO_CSV[search_link_for_add_number_external_links]['external_links'] = \
+                    self.index_of_internal_external_links
+
 
         # następny sprawdzany link +1
         self.searchIDX += 1
 
         # dodanie do słownika linku i liczby podstron odnalezionych na tej stronie
-        self.links_internal_links_count_dict[self.search_link]['internal_links'] = self.index_of_internal_external_links
+        self.ALL_DATA_TO_CSV[self.search_link]['internal_links'] = self.index_of_internal_external_links
 
         # następny sprawdzany link
         new_url_for_spider = self.id_link_dict.get(self.searchIDX)
@@ -115,37 +123,29 @@ class WebCrawler:
     def render_name_page(self):
         link = list(self.links_cleaner)
         from_end = link[::-1]
-        dot_or_slash_index = from_end.index("/" or '.')
-        take_url = dot_or_slash_index
+        dot_or_slash_index = from_end.index('.')
+        take_url = dot_or_slash_index - 4
         no_dot = from_end[take_url:]
         from_end = no_dot[::-1]
         joined = ''.join(from_end)
-        self.ALL_DATA_TO_CSV[joined]['reference_count'] += 1
+        print(joined)
+        if joined in self.link_title_dict:
+            self.ALL_DATA_TO_CSV[joined]['reference_count'] += 1
+        else:
+            self.ALL_DATA_TO_CSV[joined] = {'reference_count': 1}
 
     def add_data_to_csv(self):
 
-        for a, b in self.link_title_dict.items():
+        for link, values in self.ALL_DATA_TO_CSV.items():
             data = {
-                'link': [],
-                'title': [b],
-                'number of internal links': [],
-                'number of external links': [],
-                'reference count': []
+                'link': [link],
+                'title': [self.ALL_DATA_TO_CSV[link]['title']],
+                'internal_links': [self.ALL_DATA_TO_CSV[link]['internal_links']],
+                'external_links': [self.ALL_DATA_TO_CSV[link]['external_links']],
+                'reference_count': [self.ALL_DATA_TO_CSV[link]['reference_count']]
             }
             df = pd.DataFrame(data)
             df.to_csv('data.csv', mode='a', index=False, header=False)
 
 
 start = WebCrawler("https://www.youtube.com/", 5)
-
-# TODO:Przepraszam za niekompletną funkcję zliczania
-# podstron i podstron podstron ale przez te nocne kodowanie przysypiam na fotelu ,
-# za mało czasu miałem na napisanie tego "Simple web crawler" z podkreśleniem na Simple :)
-# 4 dni walczyłem z szukaniem normal.mod na partycjach zeby zainstalować Ubuntu na tym dinozaurze (laptopie)
-# Cud że wogóle pyCharm na tym odpalił więc utknięcie w pętli podczas testowania programu kończyło się :black screen,
-# Coś w stylu : kiedy junior programuje ,google, stackoverflow, copy , paste , error : black screen , reset system ,
-# polubiłem już te memy :)
-# jeśli jakimś cudem dostanę się na ten staż to chyba tylko dlatego że ktoś doceni te moje wypociny i to że starałem
-# się jak tylko umiałem , niestety za mało czasu miałem żeby doprowadzić ten kod do 100% sprawności
-# Ps. Proszę o sprawdzenie commitów
-# dziękuje za poświęcony czas !
