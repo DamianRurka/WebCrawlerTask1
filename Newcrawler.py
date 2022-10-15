@@ -107,39 +107,35 @@ class WebCrawler:
         if self.counter > 0:
             self.get_links()
         else:
-            pass
-            # self.add_data_to_csv()
+             self.add_data_to_csv()
 
 
 
     def render_name_page(self):
-        link = tuple(self.links_cleaner)
-        index_of_dot = link.index(".")
-        take_url = index_of_dot + 1
-        no_dot = link[take_url:]
+        link = list(self.links_cleaner)
+        from_end = link[::-1]
+        dot_or_slash_index = from_end.index("/" or '.')
+        take_url = dot_or_slash_index
+        no_dot = from_end[take_url:]
+        from_end = no_dot[::-1]
+        joined = ''.join(from_end)
+        self.clear_link_reference_count_dict[joined] += 1
 
-        if "." not in no_dot:
-            self.links_cleaner = no_dot
-            self.clear_link_reference_count_dict[self.links_cleaner] += 1
+    def add_data_to_csv(self):
+        self.clear_link_reference_count_dict |= self.link_reference_count_dict
 
-        if "." in no_dot:
-            index_of_dot = no_dot.index('.')
-            self.links_cleaner = no_dot[:index_of_dot]
-            self.clear_link_reference_count_dict[self.links_cleaner] += 1
 
-    # def add_data_to_csv(self):
-    #
-    #     for a, b  in self.link_title_dict:
-    #         print("{}: {}".format(a, b))
-    #         data = {
-    #             'link': [a],
-    #             'title': [b],
-    #             'number of internal links': [self.c],
-    #             'number of external links': [self.d],
-    #             'reference count': [self.?????]
-    #         }
-    #         df = pd.DataFrame(data)
-    #         df.to_csv('data.csv', mode='a', index=False, header=False)
+        for a, b  in self.link_title_dict.items():
+            print("{}: {}".format(a, b))
+            data = {
+                'link': [a],
+                'title': [b],
+                'number of internal links': [self.c],
+                'number of external links': [self.d],
+                'reference count': [self.z]
+            }
+            df = pd.DataFrame(data)
+            df.to_csv('data.csv', mode='a', index=False, header=False)
 
 
 
